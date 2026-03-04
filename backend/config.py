@@ -1,9 +1,17 @@
+from pathlib import Path
 from typing import List
 
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
+BASE_DIR = Path(__file__).resolve().parent
 
 
 class Settings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=BASE_DIR / ".env",
+        case_sensitive=True,
+        extra="ignore",
+    )
+
     API_V1_STR: str = "/VLT/content/v1"
 
     BACKEND_CORS_ORIGINS: List[str] = [
@@ -17,8 +25,9 @@ class Settings(BaseSettings):
 
     PROJECT_NAME: str = "Vernacular Language Translator Platform APIs"
 
-    class Config:
-        case_sensitive = True
+    # Required environment variables
+    MONGODB_URL: str
+    MONGODB_DB_NAME: str
 
 
 settings = Settings()

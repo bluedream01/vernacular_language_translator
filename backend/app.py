@@ -1,5 +1,6 @@
 import sys
 from pathlib import Path
+from motor.motor_asyncio import AsyncIOMotorClient
 
 file = Path(__file__).resolve()
 parent, root = file.parent, file.parents[1]
@@ -49,7 +50,17 @@ def index(request: Request) -> Any:
     )
 
     return HTMLResponse(content=body)
+@app.on_event("startup")
+async def startup_db_client():
+    app.mongodb_client = AsyncIOMotorClient(settings.MONGODB_URL)
+    app.mongodb = app.mongodb_client[settings.MONGODB_DB_NAME]
+    print("MongoDB Connected")
 
+
+@app.on_event("shutdown")
+async def shutdown_db_client():
+    app.mongodb_client.close()
+    print("MongoDB Disconnected")
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
 app.include_router(root_router)

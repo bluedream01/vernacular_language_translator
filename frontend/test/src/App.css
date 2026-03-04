@@ -543,3 +543,22 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+/* AUDIO PLAYER FIX */
+.audio-player {
+  width: 100%;
+  margin-top: 1.5rem;
+  border-radius: 12px;
+  outline: none;
+}
+
+/* Make sure it is visible */
+audio {
+  display: block;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+/* Prevent weird infinite hidden playback */
+audio[autoplay] {
+  outline: 2px solid #667eea;
+}
