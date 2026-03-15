@@ -6,11 +6,19 @@
 
 .app {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   padding: 2rem;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+
+  background:
+    radial-gradient(circle at 15% 20%, rgba(255,255,255,0.15), transparent 40%),
+    radial-gradient(circle at 85% 10%, rgba(255,255,255,0.12), transparent 45%),
+    radial-gradient(circle at 50% 90%, rgba(255,255,255,0.08), transparent 50%),
+    linear-gradient(135deg, #4f46e5 0%, #6366f1 50%, #9333ea 100%);
+
+  background-attachment: fixed;
+
+  font-family: -apple-system, BlinkMacSystemFont,'Segoe UI','Roboto','Oxygen',
+  'Ubuntu','Cantarell','Fira Sans','Droid Sans','Helvetica Neue',sans-serif;
+
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -18,6 +26,7 @@
 .container {
   max-width: 800px;
   margin: 0 auto;
+
 }
 
 /* Header Styles */
@@ -26,6 +35,8 @@
   margin-bottom: 3rem;
   animation: fadeInDown 0.8s ease-out;
 }
+
+
 
 .icon-wrapper {
   display: inline-flex;
@@ -68,11 +79,11 @@
 
 /* Form Styles */
 .form {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.539);
   backdrop-filter: blur(10px);
   border-radius: 20px;
   padding: 2rem;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 20px 60px rgba(15, 15, 15, 0.587);
   animation: fadeInUp 0.8s ease-out;
   margin-bottom: 2rem;
 }
@@ -163,7 +174,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #ccc;
+  background-color: #58b9ca;
   border-radius: 28px;
   transition: all 0.4s ease;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -483,26 +494,27 @@
   position: absolute;
   right: 14px;
   bottom: 14px;
-  /* background: rgba(151, 144, 144, 0.3); */
-  color: #000000;
+  color: #000;
   border: none;
   padding: 6px 8px;
   font-size: 14px;
   border-radius: 8px;
   cursor: pointer;
-  transition: 0.2s ease-in-out;
+  transition: .2s ease-in-out;
   backdrop-filter: blur(4px);
-  
+  background: rgba(185, 185, 179, 0.7);
+  box-shadow: 0 3px 10px rgba(0,0,0,.15);
 }
 
 .mic-button:hover {
-  background: rgba(255,255,255,0.6);
+  background: rgba(255,255,255,.9);
+  transform: scale(1.05);
 }
 
 .mic-button.recording {
-  background: rgba(255,0,0,0.8);
+  background: rgba(255,0,0,.85);
   color: white;
-  box-shadow: 0 0 10px red;
+  box-shadow: 0 0 12px red;
 }
 
 
@@ -542,4 +554,352 @@
 .language-select:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+.star-container{
+  position: fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  pointer-events:none;
+  z-index:0;
+}
+
+.star{
+  position:absolute;
+  top:-20px;
+  width:18px;
+  height:18px;
+  background:white;
+
+  clip-path: polygon(
+    50% 0%,
+    61% 35%,
+    98% 35%,
+    68% 57%,
+    79% 91%,
+    50% 70%,
+    21% 91%,
+    32% 57%,
+    2% 35%,
+    39% 35%
+  );
+
+  opacity:0.8;
+
+  animation: starFall linear infinite;
+}
+
+/* random positions */
+
+.star:nth-child(1){left:5%; animation-duration:14s;}
+.star:nth-child(2){left:15%; animation-duration:12s;}
+.star:nth-child(3){left:25%; animation-duration:16s;}
+.star:nth-child(4){left:35%; animation-duration:11s;}
+.star:nth-child(5){left:45%; animation-duration:15s;}
+.star:nth-child(6){left:55%; animation-duration:13s;}
+.star:nth-child(7){left:65%; animation-duration:17s;}
+.star:nth-child(8){left:75%; animation-duration:12s;}
+.star:nth-child(9){left:85%; animation-duration:16s;}
+.star:nth-child(10){left:95%; animation-duration:14s;}
+.star:nth-child(11){left:20%; animation-duration:18s;}
+.star:nth-child(12){left:40%; animation-duration:15s;}
+.star:nth-child(13){left:60%; animation-duration:13s;}
+.star:nth-child(14){left:80%; animation-duration:16s;}
+.star:nth-child(15){left:30%; animation-duration:12s;}
+.star:nth-child(16){left:50%; animation-duration:17s;}
+.star:nth-child(17){left:70%; animation-duration:14s;}
+.star:nth-child(18){left:90%; animation-duration:15s;}
+.star:nth-child(19){left:10%; animation-duration:16s;}
+.star:nth-child(20){left:85%; animation-duration:18s;}
+
+/* falling animation */
+
+@keyframes starFall{
+
+  0%{
+    transform:translateY(-40px) rotate(0deg);
+    opacity:0;
+  }
+
+  10%{
+    opacity:1;
+  }
+
+  50%{
+    transform:translateY(50vh) translateX(40px) rotate(180deg);
+  }
+
+  100%{
+    transform:translateY(110vh) translateX(-40px) rotate(360deg);
+    opacity:0;
+  }
+
+}
+/* Segmented Control Styles */
+.segment-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.segment-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #0c0b0b; /* Matches your professional dark theme */
+}
+
+.segmented-control {
+  position: relative;
+  display: flex;
+  background: rgba(0, 0, 0, 0.2); /* Deep inset look */
+  padding: 4px;
+  border-radius: 12px;
+  width: 180px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.segment-btn {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 8px 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  z-index: 2;
+  transition: color 0.3s ease;
+}
+
+.segment-btn.active {
+  color: #fff;
+}
+
+/* The Sliding Pill */
+.selection-pill {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: calc(50% - 4px);
+  height: calc(100% - 8px);
+  background: linear-gradient(135deg, #6366f1 0%, #7c3aed 100%);
+  border-radius: 8px;
+  z-index: 1;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Move pill based on state */
+.selection-pill.audio {
+  transform: translateX(100%);
+}
+
+.selection-pill.text {
+  transform: translateX(0);
+}
+/* Container Layout */
+.language-selection-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 24px 0;
+  position: relative;
+}
+
+/* Individual Language Cards */
+.lang-card {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 12px 16px;
+  border-radius: 16px;
+  transition: all 0.3s ease;
+}
+
+.lang-card:focus-within {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #6366f1;
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.2);
+}
+
+.lang-mini-label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+
+/* The Select Element */
+.select-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lang-icon { font-size: 1.1rem; }
+
+.professional-select {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  appearance: none; /* Removes default arrow for a cleaner look */
+}
+
+/* Professional Swap Button */
+.swap-circular-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 2;
+}
+
+.swap-circular-btn:hover:not(:disabled) {
+  background: #6366f1;
+  border-color: #6366f1;
+  transform: rotate(180deg);
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.5);
+}
+
+.swap-arrow { font-size: 1.4rem; font-weight: bold; }
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .language-selection-container {
+    flex-direction: column;
+  }
+  .swap-circular-btn {
+    transform: rotate(90deg);
+  }
+}
+/* --- High-Contrast Glass Containers --- */
+.form {
+  /* Darkened background so white text is readable */
+  background: rgba(15, 23, 42, 0.45); 
+  backdrop-filter: blur(25px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-top-color: rgba(255, 255, 255, 0.3); /* "Rim light" for depth */
+  border-radius: 32px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+/* --- Language Card Visibility Fix --- */
+.lang-card {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.25); /* Deep contrast background */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 14px 18px;
+  border-radius: 18px;
+  transition: all 0.3s ease;
+}
+
+.lang-mini-label {
+  color: #a5b4fc; /* Light Indigo instead of grey for better visibility */
+  font-weight: 800;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.professional-select {
+  color: #ffffff;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+/* --- Toggle Visibility Fix --- */
+.toggle-container {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 1.25rem;
+}
+
+.toggle-text, .segment-label {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+/* --- Subtitle Visibility (The text under the main title) --- */
+.subtitle {
+  color: rgba(255, 255, 255, 0.85);
+  background: rgba(0, 0, 0, 0.1);
+  padding: 4px 12px;
+  border-radius: 20px;
+  display: inline-block;
+}
+.app {
+  min-height: 100vh;
+  /* Darkened the gradient base */
+  background: #0f172a; 
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(79, 70, 229, 0.3) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(147, 51, 234, 0.2) 0px, transparent 50%),
+    radial-gradient(at 50% 100%, rgba(30, 58, 138, 0.3) 0px, transparent 50%);
+}
+/* --- Embedded Input Section --- */
+.input {
+  width: 100%;
+  padding: 1.25rem;
+  font-size: 1.1rem;
+  /* Deep dark transparent background */
+  background: rgba(0, 0, 0, 0.35); 
+  /* Subtle border that matches the card theme */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  color: white;
+  transition: all 0.3s ease;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.input:focus {
+  outline: none;
+  background: rgba(0, 0, 0, 0.5);
+  border-color: #6366f1;
+  /* Glow effect to make it pop when active */
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.2), inset 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+.input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* --- Upload Button --- */
+.button-secondary {
+  background: rgba(255, 255, 255, 0.05);
+  color: #e2e8f0;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(5px);
+}
+
+.button-secondary:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+/* Text next to the upload button */
+.file-chosen-text {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.9rem;
+  font-style: italic;
 }

@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import './App.css'
+import Header from "./components/Header"
 import { assets } from './assets/assets'
 
 // Get API URL from environment variables or use default
@@ -11,11 +12,17 @@ function App() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [useLocalLLM, setUseLocalLLM] = useState(false)
-
   const [speechLang, setSpeechLang] = useState("en-IN")
+  const [translateLang, setTranslateLang] = useState("hi-IN")
 
   const [isRecording, setIsRecording] = useState(false)
-  let recognition
+  const [audioFile, setAudioFile] = useState(null) 
+  
+  const [outputType, setOutputType] = useState("text")
+
+  const recognitionRef = useRef(null)
+
+  /* ---------------- Speech To Text ---------------- */
 
   const startStopRecording = () => {
     if (!("webkitSpeechRecognition" in window)) {
@@ -23,17 +30,18 @@ function App() {
       return
     }
 
-    if (isRecording) {
-      recognition.stop()
+    if (isRecording && recognitionRef.current) {
+      recognitionRef.current.stop()
       setIsRecording(false)
       return
     }
 
-    recognition = new window.webkitSpeechRecognition()
+    const recognition = new window.webkitSpeechRecognition()
     recognition.continuous = false
     recognition.interimResults = false
-    recognition.lang = speechLang   //<- need to set speech language
+    recognition.lang = speechLang
 
+    recognitionRef.current = recognition
     recognition.start()
     setIsRecording(true)
 
@@ -50,12 +58,23 @@ function App() {
     recognition.onend = () => setIsRecording(false)
   }
 
+  /* ---------------- Audio Upload ---------------- */
+
+  const handleAudioUpload = (e) => {
+    const file = e.target.files[0]
+    if (file) {
+      setAudioFile(file)
+      setQuestion("")   // Clear text if audio chosen
+    }
+  }
+
+  /* ---------------- Submit ---------------- */
 
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    if (!question.trim()) {
-      setError('Please enter a question')
+    if (!question.trim() && !audioFile) {
+      setError('Please enter a question or upload audio')
       return
     }
 
@@ -64,16 +83,30 @@ function App() {
     setResponse(null)
 
     try {
-      const res = await fetch(`${API_URL}/VLT/content/v1/generate`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          question: question.trim(),
-          local_llm: useLocalLLM
+      let res
+
+      if (audioFile) {
+        const formData = new FormData()
+        formData.append("audio", audioFile)
+        formData.append("local_llm", useLocalLLM)
+
+        res = await fetch(`${API_URL}/VLT/content/v1/generate`, {
+          method: 'POST',
+          body: formData
         })
-      })
+      } else {
+        res = await fetch(`${API_URL}/VLT/content/v1/generate`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            question: question.trim(),
+            local_llm: useLocalLLM,
+            output_type: outputType
+          })
+        })
+      }
 
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`)
@@ -81,6 +114,7 @@ function App() {
 
       const data = await res.json()
       setResponse(data)
+
     } catch (err) {
       setError(err.message || 'Failed to generate content. Please make sure the backend is running.')
     } finally {
@@ -92,87 +126,247 @@ function App() {
     setQuestion('')
     setResponse(null)
     setError(null)
+    setAudioFile(null)
   }
 
+  const handleRemoveFile = () => {
+    setAudioFile(null)
+
+    // Reset hidden input value also
+    const input = document.getElementById("audioUpload")
+    if (input) input.value = ""
+  }
+  const swapLanguages = () => {
+    const temp = speechLang
+    setSpeechLang(translateLang)
+    setTranslateLang(temp)
+  }
+
+  const languages = [
+    { code: "en-IN", name: "English" },
+    { code: "hi-IN", name: "Hindi" },
+    { code: "bn-IN", name: "Bengali" },
+    { code: "ta-IN", name: "Tamil" },
+    { code: "te-IN", name: "Telugu" },
+    { code: "mr-IN", name: "Marathi" },
+    { code: "gu-IN", name: "Gujarati" },
+    { code: "kn-IN", name: "Kannada" },
+    { code: "ml-IN", name: "Malayalam" },
+    { code: "pa-IN", name: "Punjabi" },
+    { code: "ur-IN", name: "Urdu" }
+  ]
+
+  const speakText = (text) => {
+    if (!text) return;
+
+    const speech = new SpeechSynthesisUtterance(text)
+
+    // set language based on translate selection
+    speech.lang = translateLang
+
+    window.speechSynthesis.cancel() // stop previous speech
+    window.speechSynthesis.speak(speech)
+  }
   return (
     <div className="app">
+      <div className="star-container">
+  {Array.from({ length: 40 }).map((_, i) => (
+    <span 
+      key={i} 
+      className="star" 
+      style={{
+        left: `${Math.random() * 100}%`,
+        top: `${Math.random() * 100}%`,
+        animationDuration: `${10 + Math.random() * 15}s`,
+        animationDelay: `${Math.random() * 5}s`
+      }}
+    ></span>
+  ))}
+</div>
       <div className="container">
 
         {/* Header */}
-        <div className="header">
-          <div className="icon-wrapper">
-            <svg className="icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </div>
-          <h1 className="title">Vernacular Language Translator</h1>
-          <p className="subtitle">Ask any question and get AI-powered insights</p>
-        </div>
+        <Header />
 
         <form onSubmit={handleSubmit} className="form">
 
-            {/* Input text or voice */}
-            <div className="input-wrapper voice-input">
-              <textarea
-                value={question}
-                onChange={(e) => setQuestion(e.target.value)}
-                placeholder="Enter your question here..."
-                className="input"
-                rows="4"
-                disabled={loading}
-              />
-              <button
-                type="button"
-                className={`mic-button ${isRecording ? "recording" : ""}`}
-                onClick={startStopRecording}
-                disabled={loading}
-              >
-                {isRecording ? <img src={assets.stop_icon} alt="" /> : <img src={assets.mic_icon} alt="" /> }
-              </button>
-            </div>
+          {/* Input text or voice */}
+          <div className="input-wrapper voice-input">
+            <textarea
+              value={question}
+              onChange={(e) => setQuestion(e.target.value)}
+              placeholder="Enter your question here..."
+              className="input"
+              rows="4"
+              disabled={loading}
+            />
+            <button
+              type="button"
+              className={`mic-button ${isRecording ? "recording" : ""}`}
+              onClick={startStopRecording}
+              disabled={loading}
+            >
+              {isRecording
+                ? <img src={assets.stop_icon} alt="" />
+                : <img src={assets.mic_icon} alt="" />}
+            </button>
+          </div>
 
-            <div className="language-box">
-              <label className="language-label">Speech Language</label>
+          {/* Audio Upload  */}
+          <input
+            type="file"
+            accept="audio/*"
+            onChange={handleAudioUpload}
+            disabled={loading}
+            id="audioUpload"
+            style={{ display: "none" }}
+          />
+
+          {/* Button + File Name Row */}
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+            <button
+              type="button"
+              className="button button-secondary"
+              onClick={() => document.getElementById("audioUpload").click()}
+              disabled={loading}
+              style={{
+                width: "200px",
+                height: "40px",
+                minWidth: "200px",
+                flex: "0 0 200px" 
+              }}
+            >
+              Upload Audio
+            </button>
+
+            <div style={{ position: "relative", display: "inline-block",maxWidth: "calc(100% - 210px)",minWidth: "120px" }}>
+              {audioFile ? (
+                <>
+                  <span
+                    title={audioFile.name}
+                    style={{
+                      fontSize: "14px",
+                      padding: "8px 30px 8px 12px",
+                      backgroundColor: "#e6f4ea",
+                      color: "#1b5e20",
+                      borderRadius: "6px",
+                      fontWeight: "500",
+                      display: "block",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {audioFile.name}
+                  </span>
+
+                  {/* ❌ Remove Icon */}
+                  <span
+                    onClick={handleRemoveFile}
+                    style={{
+                      position: "absolute",
+                      top: "-6px",
+                      right: "-6px",
+                      backgroundColor: "#1b5e20",
+                      color: "white",
+                      borderRadius: "50%",
+                      width: "18px",
+                      height: "18px",
+                      fontSize: "12px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      cursor: "pointer"
+                    }}
+                  >
+                    ✕
+                  </span>
+                </>
+              ) : (
+                <span style={{ fontSize: "14px", opacity: 0.7 }}>
+                  No file chosen
+                </span>
+              )}
+            </div>
+          </div>
+
+            <div className="language-selection-container">
+          {/* Input Language Card */}
+          <div className={`lang-card ${loading ? 'disabled' : ''}`}>
+            <label className="lang-mini-label">Source Language</label>
+            <div className="select-wrapper">
+              <span className="lang-icon">🌐</span>
               <select
-                className="language-select"
+                className="professional-select"
                 value={speechLang}
                 onChange={(e) => setSpeechLang(e.target.value)}
                 disabled={loading}
               >
-                <option value="en-IN">English</option>
-                <option value="hi-IN">Hindi</option>
-                <option value="bn-IN">Bengali</option>
+                {languages.map((lang) => (
+                  <option key={lang.code} value={lang.code}>{lang.name}</option>
+                ))}
               </select>
             </div>
+          </div>
 
-            {/* Choose format */}
+          {/* Swap Button - Now more prominent */}
+          <button 
+            type="button" 
+            className="swap-circular-btn" 
+            onClick={swapLanguages}
+            title="Swap Languages"
+            disabled={loading}
+          >
+            <span className="swap-arrow">⇄</span>
+          </button>
+
+          {/* Target Language Card */}
+          <div className={`lang-card ${loading ? 'disabled' : ''}`}>
+            <label className="lang-mini-label">Target Language</label>
+            <div className="select-wrapper">
+              <span className="lang-icon">🎯</span>
+              <select
+                className="professional-select"
+                value={translateLang}
+                onChange={(e) => setTranslateLang(e.target.value)}
+                disabled={loading}
+              >
+                {languages
+                  .filter((lang) => lang.code !== speechLang)
+                  .map((lang) => (
+                    <option key={lang.code} value={lang.code}>{lang.name}</option>
+                  ))}
+              </select>
+            </div>
+          </div>
+        </div>
+
+
+            {/* Output Format Segmented Control */}
             <div className="toggle-container">
-              <label className="toggle-label">
-                <span className="toggle-text">
-                  <svg className="toggle-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M9 3H5C3.89543 3 3 3.89543 3 5V9C3 10.1046 3.89543 11 5 11H9C10.1046 11 11 10.1046 11 9V5C11 3.89543 10.1046 3 9 3Z" stroke="currentColor" strokeWidth="2"/>
-                    <path d="M19 3H15C13.8954 3 13 3.89543 13 5V9C13 10.1046 13.8954 11 15 11H19C20.1046 11 21 10.1046 21 9V5C21 3.89543 20.1046 3 19 3Z" stroke="currentColor" strokeWidth="2"/>
-                    <path d="M9 13H5C3.89543 13 3 13.8954 3 15V19C3 20.1046 3.89543 21 5 21H9C10.1046 21 11 20.1046 11 19V15C11 13.8954 10.1046 13 9 13Z" stroke="currentColor" strokeWidth="2"/>
-                    <path d="M19 13H15C13.8954 13 13 13.8954 13 15V19C13 20.1046 13.8954 21 15 21H19C20.1046 21 21 20.1046 21 19V15C21 13.8954 20.1046 13 19 13Z" stroke="currentColor" strokeWidth="2"/>
-                  </svg>
-                  Use Local LLM
-                </span>
-                <div className="toggle-switch">
-                  <input
-                    type="checkbox"
-                    checked={useLocalLLM}
-                    onChange={(e) => setUseLocalLLM(e.target.checked)}
-                    disabled={loading}
-                    className="toggle-input"
-                  />
-                  <span className="toggle-slider"></span>
+              <div className="segment-wrapper">
+                <span className="segment-label">Output Format</span>
+                <div className="segmented-control">
+                  {/* The background pill that slides */}
+                  <div className={`selection-pill ${outputType}`}></div>
+                  
+                  <button 
+                    type="button"
+                    className={`segment-btn ${outputType === 'text' ? 'active' : ''}`}
+                    onClick={() => setOutputType('text')}
+                  >
+                    Text
+                  </button>
+                  
+                  <button 
+                    type="button"
+                    className={`segment-btn ${outputType === 'audio' ? 'active' : ''}`}
+                    onClick={() => setOutputType('audio')}
+                  >
+                    Audio
+                  </button>
                 </div>
-              </label>
-              <p className="toggle-description">
-                {useLocalLLM ? 'Using local LLM for generation' : 'Using cloud AI services'}
-              </p>
+              </div>
             </div>
 
             {/* Generating Button */}
@@ -180,7 +374,7 @@ function App() {
               <button
                 type="submit"
                 className="button button-primary"
-                disabled={loading || !question.trim()}
+                disabled={loading || (!question.trim() && !audioFile)}
               >
                 {loading ? (
                   <>
@@ -235,7 +429,51 @@ function App() {
 
             <div className="response-content">
               <h3 className="content-label">Generated Content:</h3>
-              <div className="content-text">{response.data}</div>
+              {outputType === "text" ? (
+                <div style={{ position: "relative" }}>
+                  
+                  {/* Speaker Button */}
+                  <button
+                    onClick={() => speakText(response.data)}
+                    style={{
+                      position: "absolute",
+                      top: "5px",
+                      right: "40px",
+                      border: "none",
+                      background: "transparent",
+                      fontSize: "20px",
+                      cursor: "pointer"
+                    }}
+                    title="Listen"
+                  >
+                    🔊
+                  </button>
+
+                  {/* Stop Button */}
+                  <button
+                    onClick={stopSpeech}
+                    style={{
+                      position: "absolute",
+                      top: "5px",
+                      right: "5px",
+                      border: "none",
+                      background: "transparent",
+                      fontSize: "20px",
+                      cursor: "pointer"
+                    }}
+                    title="Stop"
+                  >
+                    ⏹
+                  </button>
+
+                  <div className="content-text">{response.data}</div>
+
+                </div>
+              ) : (
+                <audio controls style={{ width: "100%" }}>
+                  <source src={response.data} type="audio/mpeg" />
+                </audio>
+              )}
             </div>
           </div>
         )}
@@ -243,5 +481,4 @@ function App() {
     </div>
   )
 }
-
 export default App
